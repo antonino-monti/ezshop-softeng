@@ -62,6 +62,9 @@ public class EZUser implements User{
     }
 
     @Override
+    /*This method sets the role of the user. Valid Roles: SHOPMANAGER, ADMINISTRATOR, CASHIER.
+     *The case is ignored
+     *Any other word is invalid. In that case the role of the user remains empty.*/
     public void setRole(String role) {
         if((role).equalsIgnoreCase("SHOPMANAGER"))
             this.role=UserRole.MANAGER;
@@ -69,6 +72,7 @@ public class EZUser implements User{
             this.role=UserRole.ADMINISTRATOR;
         if((role).equalsIgnoreCase("CASHIER"))
             this.role=UserRole.CASHIER;
+
 
     }
 }
