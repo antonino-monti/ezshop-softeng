@@ -397,7 +397,10 @@ public class EZShop implements EZShopInterface {
             System.out.println(e.getMessage());
             return -1;  /*Error while saving*/
         }
+        System.out.println("sto aggiungendo user"+username);
         userList.add(newUsr);
+        System.out.println(userList.size());
+
 
         this.idUsers++;
 
@@ -682,6 +685,7 @@ public class EZShop implements EZShopInterface {
         //check product validity
         if (id==null || id<=0)
             throw new InvalidProductIdException();
+
         //check description validity
         if (newDescription==null || newDescription.trim().equals(""))
             throw new InvalidProductDescriptionException();
@@ -874,11 +878,11 @@ public class EZShop implements EZShopInterface {
             throw new InvalidProductIdException();
 
         //check if the product exists in the map
-        for (ProductType p: this.productTypeMap.values())
+        for (ProductType p : this.productTypeMap.values())
         {
             if (p.getId().equals(productId)) //Found
             {
-                int newQuantity =p.getQuantity() + toBeAdded;
+                int newQuantity = p.getQuantity() + toBeAdded;
 
                 if (toBeAdded<0 && newQuantity<0)
                     return false;
@@ -1575,7 +1579,7 @@ public class EZShop implements EZShopInterface {
                     return false;
                 c.setPoints(c.getPoints() + pointsToBeAdded);
                 try {
-                    if(!this.dbase.updatePoints(c.getId(),c.getPoints() + pointsToBeAdded))
+                    if(!this.dbase.updatePoints(c.getId(),c.getPoints()))
                         return false;
                     break;
                 } catch (SQLException e) {
@@ -1780,13 +1784,13 @@ public class EZShop implements EZShopInterface {
             s.setPrice(this.computeSaleTransactionPrice(s));
             saleTransactionMap.put(transactionId, s);
 
-            /*
+
             // aggiorna (temporaneamente) la quantità del prodotto e la mappa dei prodotti
             p.setQuantity(p.getQuantity() + amount);
 
             // aggiorna la mappa dei prodotti
             productTypeMap.put(productCode, p);
-            */
+
 
             return true;
         }
@@ -1996,7 +2000,7 @@ public class EZShop implements EZShopInterface {
         }
 
         // aggiorna dati in locale
-        List<TicketEntry> entryList = st.getEntries();
+        /*List<TicketEntry> entryList = st.getEntries();
 
         for (TicketEntry e : entryList) {
             ProductType p = this.productTypeMap.get(e.getBarCode());
@@ -2004,7 +2008,7 @@ public class EZShop implements EZShopInterface {
             // aggiorna la quantità del prodotto
             p.setQuantity(p.getQuantity() - e.getAmount());
             productTypeMap.put(p.getBarCode(), p);
-        }
+        }*/
 
         this.transactionMap.put(transactionId, bo);
         this.saleTransactionMap.put(transactionId, st);
@@ -2289,8 +2293,6 @@ public class EZShop implements EZShopInterface {
                 // update the quantity for each product in the return list
                 EZProductType p = (EZProductType) this.productTypeMap.get(prodCode);
                 int quantity = rMap.get(prodCode);
-                p.setQuantity(p.getQuantity() + quantity);
-                this.productTypeMap.put(prodCode, p);
 
                 // update corresponding sale entry
                 sale.updateProductInEntry(prodCode, -quantity);
@@ -2566,10 +2568,6 @@ public class EZShop implements EZShopInterface {
 
         this.saleTransactionMap.put(result.getTicketNumber(), result);
 
-        // aggiorna la carta di credito
-        ccMap.put(creditCard, ccAmount - result.getPrice());
-        reader.setCreditCards(ccMap, "testFiles/creditCardFile_test.csv");
-
         return true;
     }
 
@@ -2724,10 +2722,6 @@ public class EZShop implements EZShopInterface {
 
         this.saleTransactionMap.put(sale.getTicketNumber(), sale);
         this.returnTransactionMap.put(result.getReturnID(), result);
-
-        // aggiorna la carta di credito
-        ccMap.put(creditCard, ccMap.get(creditCard) + result.getMoneyReturned());
-        reader.setCreditCards(ccMap, "testFiles/creditCardFile_test.csv");
 
         return result.getMoneyReturned();
     }

@@ -56,14 +56,14 @@ We adopted a **bottom-up** approach for testing, in which we started from the cl
 ## Step 2
 | Classes  | JUnit test cases |
 |--|--|
-|EZDatabase|TestDBClass|
+|EZDatabase + classes from step1|TestDBClass|
 
 
 ## Step 3
 
 | Classes  | JUnit test cases |
 |--|--|
-|EZShop|IntegrationTest_Accounting|
+|EZShop + class of step2 and step1|IntegrationTest_Accounting|
 ||IntegrationTest_Payments|
 ||IntegrationTest_ReturnTransaction|
 ||IntegrationTest_SaleTransaction|

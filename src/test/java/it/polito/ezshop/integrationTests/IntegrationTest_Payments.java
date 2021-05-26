@@ -95,7 +95,6 @@ public class IntegrationTest_Payments {
 
             assertTrue(st.getStatus().equalsIgnoreCase("PAID"));
 
-            // TODO: test return payments
             int rID = ez.startReturnTransaction(tID);
 
             assertTrue(ez.returnProduct(rID, validBC, 2));

@@ -28,7 +28,7 @@ public class EZSaleTransaction implements SaleTransaction {
 
     public EZSaleTransaction(Integer transactionID) {
         this.transactionID = transactionID;
-        this.discountRate = 1;
+        this.discountRate = 0;
         this.price = 0;
         this.entryList = new ArrayList<>();
         this.returnList = new ArrayList<>();
