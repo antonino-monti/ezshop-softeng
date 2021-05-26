@@ -69,4 +69,12 @@ public class BB_UnitTesting {
 
         assertTrue(map_res.containsKey("273564276542"));
     }
+    @Test
+    public void test_CustomerCardVal() {
+        assertFalse(ez.checkCustomerCardValidity("Stringadilettere")); //Solo Numeri
+        assertFalse(ez.checkCustomerCardValidity("000000")); //lenght<10
+        assertFalse(ez.checkCustomerCardValidity(null));
+        assertFalse(ez.checkCustomerCardValidity(""));
+        assertTrue((ez.checkCustomerCardValidity("5000000001")));
+    }
 }

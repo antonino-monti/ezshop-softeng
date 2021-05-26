@@ -95,6 +95,37 @@ Version: 1.0
 | * | Invalid/NULL | Invalid | checkCreditCardValidity("79927398718")<br/> -> false<br/> | BB_UnitTesting.test_InvalidCreditCard |
 | All numeric       | Valid                  | Valid           | checkBarCodeValidity("79927398713")<br/> -> true     | BB_UnitTesting.test_ValidCreditCard   |
 
+### **Class *EZShop* - method *checkCustomerCardValidity***
+**Criteria for method *checkCustomerCardValidity*:**
+
+- Length of CustomerCard 
+- Data type of CustomerCard digits
+
+**Predicates for method *checkBarCodeValidity*:**
+
+  | Criteria | Predicate |
+  | -------- | --------- |
+  | Length of CustomerCard | =0 && <10 |
+  |  | = 10 |
+  | | 10 <  |
+  | Data type of barCode digits | All characters are numeric |
+  |  | Not all characters are numeric |
+
+**Boundaries**:
+
+| Criteria | Boundary values |
+| -------- | --------------- |
+| Length of barCode | 0, 10, +maxint |
+| Data type of barCode digits | All numeric, not all numeric |
+
+| Length of CustomerCard | Data type of CustomerCard digits | Valid / Invalid | Description of the test case | JUnit test case |
+|-------|--------------|-------|-------|-------|
+|[0, 10)|*|Invalid|checkCustomerCardValidity("42")<br/> -> false<br/>checkCustomerCardValidity(null)<br/> -> false|BB_UnitTesting.test_CustomerCardVal|
+|(10, maxint)| *|Invalid|checkCustomerCardValidity("62910415002187326548")<br/> -> false<br/>|BB_UnitTesting.test_CustomerCardVal|
+|*| Not all numeric  |Invalid|checkCustomerCardValidity("1234a234b")<br/> -> false<br/>|BB_UnitTesting.test_CustomerCardVal|
+|[10]|All numeric|Valid|checkCustomerCardValidity("5000000001")<br/> -> true|BB_UnitTesting.test_CustomerCardVal|
+
+  
 
 # White Box Unit Tests
 

@@ -86,19 +86,19 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 
 | Scenario ID | Functional Requirements covered | JUnit  Test(s) |
 | ----------- | ------------------------------- | ----------- |
-|  1.1      | (products)                   |             |
-|  1.2      |                              |             |
-| 1.3      |                                 |             |
+|  1.1      | FR3.1                 | EZShopProductTypeTest.Test_createProductType()            |
+|  1.2      | FR3.1                         |         EZShopProductTypeTest.Test_getUpdatePosition()    |
+| 1.3      |      FR3.1                           |         EZShopProductTypeTest.Test_updateProduct()    |
 | 2.1      | FR1.1 | EZShopUserMethodsTest.createUserValid() |
 | 2.2    | FR1.2, FR1.4 | EZShopUserMethodsTest.testDeleteUserValid() |
 | 2.3      | FR1.5 | EZShopUserMethodsTest.testUpdateUserRightsValid() |
 | 3.1 | FR4.4 | EZShopOrderMethodsTest.IssueOrderValid() |
 | 3.2 | FR4.5 | EZShopOrderMethodsTest.PayOrderOrderValid() |
 | 3.3 | FR4.6 | EZShopOrderMethodsTest.RecordOrderArrivalValid() |
-| 4.1 | (customers and cards) | |
-| 4.2 | | |
-| 4.3 | | |
-| 4.4 | | |
+| 4.1 | FR5.1 | EZShopCustomerMethodTest.Test_defineCustomer() |
+| 4.2 | FR5.6 | EZShopCustomerMethodTest.test_attachCardToCustomer()|
+| 4.3 | FR5.1| EZShopCustomerMethodTest.Test_ModifyCustomer() |    
+| 4.4 | FR5.1| EZShopCustomerMethodTest.Test_ModifyCustomer()|
 | 5.1 | FR1.4, FR1.5 | EZShopUserMethodsTest.testLoginValid() |
 | 5.2 | " | EZShopUserMethodsTest.testLogoutLoggedUsers() |
 | 6.1 | FR6, FR7, FR8 | IntegrationTest_SaleTransaction.test_SaleTransactions, <br/>IntegrationTest_Payments.test_paymentTest |
@@ -125,5 +125,5 @@ Report also for each of the scenarios the (one or more) API JUnit tests that cov
 | -------------------------- | ------------------------------------------------------------ |
 | NFR4                       | BBUnitTesting.test_InvalidBarCode, BBUnitTesting.test_ValidBarCode |
 | NFR5                       | BBUnitTesting.test_InvalidCreditCard, BBUnitTesting.test_ValidCreditCard |
-| NFR6                       | ... (customer card = string of 10 digits)                    |
+| NFR6                       | BBUnitTesting.test_CustomerCardVal              |
 

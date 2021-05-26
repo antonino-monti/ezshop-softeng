@@ -257,6 +257,9 @@ public class EZShop implements EZShopInterface {
         return (sum % 10 == 0);
     }
     public boolean checkCustomerCardValidity(String CCard){
+        if(CCard==null) {
+            return false;
+        }
         return CCard.matches("[0-9]{10}");
     }
 
