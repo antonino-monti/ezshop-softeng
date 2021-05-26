@@ -96,6 +96,12 @@ public class IntegrationTest_SaleTransaction {
 
             assertTrue(ez.endSaleTransaction(tID));
 
+            assertEquals(price * (1 - ez.getSaleTransaction(tID).getDiscountRate()), ez.getCreditsAndDebits(null, null).get(0).getMoney(), 0.0);
+
+            System.out.println(ez.computeBalance());
+
+            assertEquals(price * (1 - ez.getSaleTransaction(tID).getDiscountRate()), ez.computeBalance(), 0.0);
+
             assertFalse(ez.deleteSaleTransaction(tID));
         }
         catch (Exception e) {

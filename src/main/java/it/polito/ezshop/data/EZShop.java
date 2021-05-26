@@ -31,6 +31,7 @@ public class EZShop implements EZShopInterface {
         try {
             this.dbase = new EZDatabase();
 
+
             // --- Users
             try {
                 this.userList = this.dbase.getUsers();
@@ -874,11 +875,11 @@ public class EZShop implements EZShopInterface {
             throw new InvalidProductIdException();
 
         //check if the product exists in the map
-        for (ProductType p : this.productTypeMap.values())
+        for (ProductType p: this.productTypeMap.values())
         {
             if (p.getId().equals(productId)) //Found
             {
-                int newQuantity = p.getQuantity() + toBeAdded;
+                int newQuantity =p.getQuantity() + toBeAdded;
 
                 if (toBeAdded<0 && newQuantity<0)
                     return false;
@@ -1336,6 +1337,7 @@ public class EZShop implements EZShopInterface {
 
     @Override
     public boolean modifyCustomer(Integer id, String newCustomerName, String newCustomerCard) throws InvalidCustomerNameException, InvalidCustomerCardException, InvalidCustomerIdException, UnauthorizedException {
+        boolean flag = false;
         if (newCustomerName==null || newCustomerName.trim().equals(""))  // Check if the newCustomerName is valid.
             throw new InvalidCustomerNameException();
 
@@ -1345,25 +1347,39 @@ public class EZShop implements EZShopInterface {
         if(userSession == null)                                         //if the user is not logged
             throw new UnauthorizedException();
 
-        if(!newCustomerCard.matches( "[0-9]{10}" ))             //newCustomerCard is not in a valid format
-            throw new InvalidCustomerCardException();
 
-        for (Customer c : this.customerMap.values()) {              //if the new customerCard already exists, return false
-            if (c.getCustomerCard().equals(newCustomerCard))
-            {
-                return false;
-            }
-        }
+        if(newCustomerCard != null){
+            if (!newCustomerCard.equals("")){
+                if(!checkCustomerCardValidity(newCustomerCard))             //newCustomerCard is not in a valid format
+                    throw new InvalidCustomerCardException();
 
-        if (newCustomerCard.trim().equals("")){                     // if the customerCard is empty, delete the Card
-            EZCustomer s = (EZCustomer) customerMap.get(id);
-            s.removeCustomerCard();
-            try {
-                this.dbase.deleteCustomerCard(s.getId());
-            } catch (SQLException e) {
-                System.out.println("There was a problem with the database:");
-                System.out.println(e.getSQLState());
-                return false;
+                for (Customer c : this.customerMap.values()) {              //if the new customerCard already exists, return false
+                    if (c.getCustomerCard().equals(newCustomerCard)) {
+                        return false;
+                    }
+                }
+                if(checkCustomerCardValidity(newCustomerCard)) {
+                    EZCustomer c = (EZCustomer) customerMap.get(id);
+                    c.setCustomerCard(newCustomerCard);
+                    try {
+                        if (!this.dbase.updateCustomerCard(c.getId(), newCustomerCard))
+                            return false;
+                    } catch (SQLException e) {
+                        System.out.println("There was a problem with the database:");
+                        System.out.println(e.getSQLState());
+                        return false;
+                    }
+                }
+            }else{
+                EZCustomer s = (EZCustomer) customerMap.get(id);        // if the customerCard is empty, delete the Card
+                s.removeCustomerCard();
+                try {
+                    this.dbase.deleteCustomerCard(s.getId());
+                } catch (SQLException e) {
+                    System.out.println("There was a problem with the database:");
+                    System.out.println(e.getSQLState());
+                    return false;
+                }
             }
         }
 
@@ -1375,18 +1391,6 @@ public class EZShop implements EZShopInterface {
             System.out.println("There was a problem with the database:");
             System.out.println(e.getSQLState());
             return false;
-        }
-
-        if(newCustomerCard.matches( "[0-9]{10}" )){
-            c.setCustomerCard(newCustomerCard);
-            try {
-                if(!this.dbase.updateCustomerCard(c.getId(), newCustomerCard))
-                    return false;
-            } catch (SQLException e) {
-                System.out.println("There was a problem with the database:");
-                System.out.println(e.getSQLState());
-                return false;
-            }
         }
 
         return true;
@@ -1444,8 +1448,10 @@ public class EZShop implements EZShopInterface {
     public Customer getCustomer(Integer id) throws InvalidCustomerIdException, UnauthorizedException {
         if(id==null || id<=0)
             throw new InvalidCustomerIdException();
-        if(userSession==null || !customerMap.containsKey(id))
+        if(userSession==null )
             throw new UnauthorizedException();
+        if(!customerMap.containsKey(id))
+            return null;
         return customerMap.get(id);
     }
 
@@ -1513,7 +1519,7 @@ public class EZShop implements EZShopInterface {
             throw new UnauthorizedException();
         if(customerId==null || customerId<=0)
             throw new InvalidCustomerIdException();
-        if( customerCard==null || !customerCard.matches( "[0-9]{10}" ))         //newCustomerCard is not in a valid format, the regex expression should check also if the string is empty.
+        if( customerCard==null || !checkCustomerCardValidity(customerCard) )         //newCustomerCard is not in a valid format, the regex expression should check also if the string is empty.
             throw new InvalidCustomerCardException();
 
         for (Customer c : this.customerMap.values()) {              //if the new customerCard already exists, return false
@@ -1599,7 +1605,7 @@ public class EZShop implements EZShopInterface {
         double total = 0;
 
         for (TicketEntry e : list) {
-            total += e.getPricePerUnit() * e.getAmount() * e.getDiscountRate();
+            total += e.getPricePerUnit() * e.getAmount() * (1 - e.getDiscountRate());
         }
 
         return total;
@@ -1681,7 +1687,7 @@ public class EZShop implements EZShopInterface {
 
             // aggiorna la lista di prodotti della transazione e ricalcola il prezzo totale
             s.addEntry(p, amount, s.getDiscountRate());
-            s.setPrice(this.computeSaleTransactionPrice(s));
+            s.setPrice(this.computeSaleTransactionPrice(s) * (1 - s.getDiscountRate()));
 
             // aggiorna (temporaneamente) la quantità del prodotto e la mappa dei prodotti
             p.setQuantity(p.getQuantity() - amount);
@@ -1772,7 +1778,7 @@ public class EZShop implements EZShopInterface {
             s.updateProductInEntry(productCode, -amount);
 
             // aggiorna il prezzo della transazione e la mappa
-            s.setPrice(this.computeSaleTransactionPrice(s));
+            s.setPrice(this.computeSaleTransactionPrice(s) * (1 - s.getDiscountRate()));
             saleTransactionMap.put(transactionId, s);
 
 
@@ -1854,7 +1860,7 @@ public class EZShop implements EZShopInterface {
             }
 
             // Aggiorna il prezzo della transazione e la mappa
-            s.setPrice(this.computeSaleTransactionPrice(s));
+            s.setPrice(this.computeSaleTransactionPrice(s) * (1 - s.getDiscountRate()));
             saleTransactionMap.put(transactionId, s);
 
             return true;
@@ -1898,8 +1904,9 @@ public class EZShop implements EZShopInterface {
 
         EZSaleTransaction s = (EZSaleTransaction) saleTransactionMap.get(transactionId);
 
-        // aggiorna il tasso di sconto per la transazione
+        // aggiorna il tasso di sconto per la transazione e il prezzo
         s.setDiscountRate(discountRate);
+        s.setPrice(this.computeSaleTransactionPrice(s) * (1 - s.getDiscountRate()));
         // aggiorna la mappa delle transazioni
         saleTransactionMap.put(transactionId, s);
 
@@ -2195,6 +2202,7 @@ public class EZShop implements EZShopInterface {
         for (TicketEntry e : sale.getEntries()) {
             if (e.getBarCode().equals(productCode)) {
                 prodAmt = e.getAmount();
+                break;
             }
         }
         // this happens if the product is not in the transaction
@@ -2520,7 +2528,7 @@ public class EZShop implements EZShopInterface {
 
         // Controllo se la carta esiste tra quelle registrate
         EZFileReader reader = new EZFileReader();
-        Map<String, Double> ccMap = reader.readCreditCards("testFiles/creditCardFile_test.csv");
+        Map<String, Double> ccMap = reader.readCreditCards("testFiles/creditCardFile.csv");
 
         if (!ccMap.containsKey(creditCard)) {
             return false;
@@ -2558,10 +2566,6 @@ public class EZShop implements EZShopInterface {
         }
 
         this.saleTransactionMap.put(result.getTicketNumber(), result);
-
-        // aggiorna la carta di credito
-        ccMap.put(creditCard, ccAmount - result.getPrice());
-        reader.setCreditCards(ccMap, "testFiles/creditCardFile_test.csv");
 
         return true;
     }
@@ -2672,7 +2676,7 @@ public class EZShop implements EZShopInterface {
 
         // Controllo se la carta esiste tra quelle registrate
         EZFileReader reader = new EZFileReader();
-        Map<String, Double> ccMap = reader.readCreditCards("testFiles/creditCardFile_test.csv");
+        Map<String, Double> ccMap = reader.readCreditCards("testFiles/creditCardFile.csv");
 
         if (!ccMap.containsKey(creditCard)) {
             return -1;
@@ -2717,10 +2721,6 @@ public class EZShop implements EZShopInterface {
 
         this.saleTransactionMap.put(sale.getTicketNumber(), sale);
         this.returnTransactionMap.put(result.getReturnID(), result);
-
-        // aggiorna la carta di credito
-        ccMap.put(creditCard, ccMap.get(creditCard) + result.getMoneyReturned());
-        reader.setCreditCards(ccMap, "testFiles/creditCardFile_test.csv");
 
         return result.getMoneyReturned();
     }

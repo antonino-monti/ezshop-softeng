@@ -74,9 +74,20 @@ public class IntegrationTest_Payments {
             ez.addProductToSale(tID, validBC, 10);
             assertTrue(ez.endSaleTransaction(tID));
 
+            System.out.println(ez.getSaleTransaction(tID).getEntries().get(0).getAmount());
+            System.out.println(ez.getSaleTransaction(tID).getEntries().get(0).getDiscountRate());
+
+            System.out.println(ez.computeSaleTransactionPrice(ez.getSaleTransaction(tID)));
+
+            System.out.println(ez.getSaleTransaction(tID).getDiscountRate());
+            System.out.println(ez.getSaleTransaction(tID).getPrice());
+
             int tID2 = ez.startSaleTransaction();
             ez.addProductToSale(tID2, validBC, 5);
             assertTrue(ez.endSaleTransaction(tID2));
+
+            System.out.println(ez.getSaleTransaction(tID2).getDiscountRate());
+            System.out.println(ez.getSaleTransaction(tID2).getPrice());
 
             assertEquals(-1, ez.receiveCashPayment(42, 1), 0.0);
             assertEquals(1, ez.receiveCashPayment(tID, 11), 0.0);
