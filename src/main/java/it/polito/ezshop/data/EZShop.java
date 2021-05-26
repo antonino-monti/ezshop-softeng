@@ -31,7 +31,6 @@ public class EZShop implements EZShopInterface {
         try {
             this.dbase = new EZDatabase();
 
-
             // --- Users
             try {
                 this.userList = this.dbase.getUsers();
@@ -106,7 +105,7 @@ public class EZShop implements EZShopInterface {
                 System.out.println("There was a problem in connecting with the SQLite database:");
                 System.out.println(e.getSQLState());
                 e.printStackTrace();
-                this.idCustomer=0;
+                this.idCustomer=1;
             }
             //CustomerId Card
             try {
@@ -116,7 +115,7 @@ public class EZShop implements EZShopInterface {
                 System.out.println("There was a problem in connecting with the SQLite database:");
                 System.out.println(e.getSQLState());
                 e.printStackTrace();
-                this.idCustomerCard=0;
+                this.idCustomerCard=1;
             }
             //ProductIds Inizializzato da db
             try{
@@ -153,8 +152,8 @@ public class EZShop implements EZShopInterface {
             this.productTypeMap = new HashMap<>();
 
             this.idUsers = 0;
-            this.idCustomer = 0;
-            this.idCustomerCard = 0;
+            this.idCustomer = 1;
+            this.idCustomerCard = 1;
             this.counter_transactionID = 0;
             this.counter_returnTransactionID = 0;
             this.productIds = 0;
@@ -257,6 +256,9 @@ public class EZShop implements EZShopInterface {
 
         return (sum % 10 == 0);
     }
+    public boolean checkCustomerCardValidity(String CCard){
+        return CCard.matches("[0-9]{10}");
+    }
 
     @Override
     public void reset() {
@@ -337,8 +339,8 @@ public class EZShop implements EZShopInterface {
 
         this.userSession = null;
         this.idUsers = 1;
-        this.idCustomer = 0;
-        this.idCustomerCard = 0;
+        this.idCustomer = 1;
+        this.idCustomerCard = 1;
         this.counter_transactionID = 0;
         this.counter_returnTransactionID = 0;
         this.productIds = 0;
@@ -395,10 +397,7 @@ public class EZShop implements EZShopInterface {
             System.out.println(e.getMessage());
             return -1;  /*Error while saving*/
         }
-
         userList.add(newUsr);
-
-
 
         this.idUsers++;
 
@@ -683,7 +682,6 @@ public class EZShop implements EZShopInterface {
         //check product validity
         if (id==null || id<=0)
             throw new InvalidProductIdException();
-
         //check description validity
         if (newDescription==null || newDescription.trim().equals(""))
             throw new InvalidProductDescriptionException();
@@ -958,7 +956,7 @@ public class EZShop implements EZShopInterface {
         if (barcodeProduct==null) //product not found
             return false;
 
-        if (newPos!=null && newPos.equals("")) newPos=null;
+        if (newPos != null && newPos.equals("")) newPos=null;
 
         //Everything good
         EZProductType pr = (EZProductType) this.productTypeMap.get(barcodeProduct);
@@ -1562,7 +1560,7 @@ public class EZShop implements EZShopInterface {
         boolean found = false;
         if(userSession==null)
             throw new UnauthorizedException();
-        if( customerCard==null || !customerCard.matches( "[0-9]{10}" ))         //newCustomerCard is not in a valid format, the regex expression should check also if the string is empty.
+        if( customerCard==null || !checkCustomerCardValidity(customerCard))         //newCustomerCard is not in a valid format, the regex expression should check also if the string is empty.
             throw new InvalidCustomerCardException();
         for (Customer c : customerMap.values()){
             if (c.getCustomerCard().equals(customerCard))
@@ -1572,8 +1570,7 @@ public class EZShop implements EZShopInterface {
                     return false;
                 c.setPoints(c.getPoints() + pointsToBeAdded);
                 try {
-                    if(!this.dbase.updatePoints(c.getId(),c.getPoints()))
-                    if(!this.dbase.updatePoints(c.getId(),c.getPoints()))
+                    if(!this.dbase.updatePoints(c.getId(),c.getPoints() + pointsToBeAdded))
                         return false;
                     break;
                 } catch (SQLException e) {
@@ -1581,7 +1578,6 @@ public class EZShop implements EZShopInterface {
                     System.out.println(e.getSQLState());
                     return false;
                 }
-
             }
         }
         return found;
@@ -2199,7 +2195,6 @@ public class EZShop implements EZShopInterface {
         for (TicketEntry e : sale.getEntries()) {
             if (e.getBarCode().equals(productCode)) {
                 prodAmt = e.getAmount();
-                break;
             }
         }
         // this happens if the product is not in the transaction
@@ -2564,6 +2559,10 @@ public class EZShop implements EZShopInterface {
 
         this.saleTransactionMap.put(result.getTicketNumber(), result);
 
+        // aggiorna la carta di credito
+        ccMap.put(creditCard, ccAmount - result.getPrice());
+        reader.setCreditCards(ccMap, "testFiles/creditCardFile_test.csv");
+
         return true;
     }
 
@@ -2718,6 +2717,10 @@ public class EZShop implements EZShopInterface {
 
         this.saleTransactionMap.put(sale.getTicketNumber(), sale);
         this.returnTransactionMap.put(result.getReturnID(), result);
+
+        // aggiorna la carta di credito
+        ccMap.put(creditCard, ccMap.get(creditCard) + result.getMoneyReturned());
+        reader.setCreditCards(ccMap, "testFiles/creditCardFile_test.csv");
 
         return result.getMoneyReturned();
     }
