@@ -12,10 +12,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <properties>
-         <sonar.organization>antonino-monti</sonar.organization>
-         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.organization>antonino-monti</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
     <repositories>
         <repository>
